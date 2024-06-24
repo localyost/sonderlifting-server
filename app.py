@@ -1,35 +1,31 @@
-import time
-
 from flask import Flask, request
 from flask_cors import cross_origin
 from flask_socketio import SocketIO
 
 app = Flask(__name__)
-socketio = SocketIO(app)
+
+socketio = SocketIO(app, debug=True, cors_allowed_origins='*', use_reloader=False)
 
 @app.route('/startTimer', methods=['POST'])
 @cross_origin()
-def startTimer():  # put application's code here
-    tick = request.json.get('time')
-    while tick:
-        time.sleep(1)
-        tick -= 1
-        socketio.emit('time', tick)
-        print(tick)
+def startTimer():
 
-
+    socketio.emit('VALUES', request.json)
+    socketio.emit('TIMER_START', request.json.get('time'))
     return "ok", 200
 
 
 @app.route('/values', methods=['POST'])
 @cross_origin()
 def values():
-    # print(request.json)
+    socketio.emit('VALUES', request.json)
     return "ok", 200
 
 @app.route('/valid', methods=['POST'])
+@cross_origin()
 def valid():
-    print(request.get_json())
+    socketio.emit('TIMER_STOP')
+    socketio.emit('VALID', request.json.get('valid'))
     return "ok", 200
 
 
