@@ -1,3 +1,4 @@
+import logging
 import time
 
 from flask import Flask, request
@@ -12,6 +13,7 @@ socketio = SocketIO(app, debug=True, cors_allowed_origins='*', use_reloader=Fals
 @app.route('/startTimer', methods=['POST'])
 @cross_origin()
 def startTimer():
+    logging.info('starting timer...')
     duration = request.json.get('time')
     socketio.emit('VALUES', request.json)
     socketio.emit('VALID')
@@ -40,6 +42,42 @@ def valid():
 @cross_origin()
 def clear():
     socketio.emit('VALID')
+    return "ok", 200
+
+
+@app.route('/name', methods=['POST'])
+@cross_origin()
+def name():
+    value = request.json.get('name')
+    logging.info('received name: %s', value)
+    return "ok", 200
+
+
+@app.route('/attempt', methods=['POST'])
+@cross_origin()
+def attempt():
+    value = request.json.get('attempt')
+    logging.info('received attempt: %d', value)
+    return "ok", 200
+
+
+@app.route('/weight', methods=['POST'])
+@cross_origin()
+def weight():
+    value = request.json.get('weight')
+    logging.info('received weight: %.1f', value)
+    return "ok", 200
+
+
+@app.route('/lift', methods=['POST'])
+@cross_origin()
+def lift():
+    name_value = request.json.get('name')
+    attempt_value = request.json.get('attempt')
+    weight_value = request.json.get('weight')
+    valid_value = request.json.get('valid')
+    logging.info('received lift: name %s, attempt %d, weight %.1f, valid %r',
+                  name_value, attempt_value, weight_value, valid_value)
     return "ok", 200
 
 
