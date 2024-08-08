@@ -3,12 +3,17 @@ import logging
 import time
 
 from flask import Flask, request
-from flask_cors import cross_origin
+from flask_cors import cross_origin, CORS
 from flask_socketio import SocketIO
 
 app = Flask(__name__)
+# List of allowed origins
+allowed_origins = ["http://sonderlifting.judge", "http://sonderlifting.display", "*"]
 
-socketio = SocketIO(app, debug=True, cors_allowed_origins='*', use_reloader=False)
+# Configure CORS
+CORS(app, resources={r"/*": {"origins": allowed_origins}})
+
+socketio = SocketIO(app, debug=True, cors_allowed_origins=allowed_origins, use_reloader=False)
 
 
 @app.route('/startTimer', methods=['POST'])
