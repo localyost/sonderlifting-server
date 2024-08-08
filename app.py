@@ -1,3 +1,4 @@
+import json
 import logging
 import time
 
@@ -50,6 +51,7 @@ def clear():
 def name():
     value = request.json.get('name')
     logging.info('received name: %s', value)
+    socketio.emit('NAME', value)
     return "ok", 200
 
 
@@ -58,6 +60,7 @@ def name():
 def attempt():
     value = request.json.get('attempt')
     logging.info('received attempt: %d', value)
+    socketio.emit('ATTEMPT', value)
     return "ok", 200
 
 
@@ -66,6 +69,7 @@ def attempt():
 def weight():
     value = request.json.get('weight')
     logging.info('received weight: %.1f', value)
+    socketio.emit('WEIGHT', value)
     return "ok", 200
 
 
@@ -77,7 +81,9 @@ def lift():
     weight_value = request.json.get('weight')
     valid_value = request.json.get('valid')
     logging.info('received lift: name %s, attempt %d, weight %.1f, valid %r',
-                  name_value, attempt_value, weight_value, valid_value)
+                 name_value, attempt_value, weight_value, valid_value)
+    socketio.emit('LIFT', json.dumps({'name': name_value, 'attempt': attempt_value, 'weight': weight_value,
+                                      'validLift': valid_value}))
     return "ok", 200
 
 @app.route('/test', methods=['GET'])
