@@ -80,6 +80,10 @@ def lift():
                   name_value, attempt_value, weight_value, valid_value)
     return "ok", 200
 
+@app.route('/test', methods=['GET'])
+@cross_origin()
+def test():
+    return "Api Works!!", 200
 
 if __name__ == '__main__':
     app.run()
