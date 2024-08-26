@@ -7,26 +7,34 @@ from flask_cors import cross_origin, CORS
 from flask_socketio import SocketIO
 
 app = Flask(__name__)
-# List of allowed origins
-allowed_origins = ["http://sonderlifting.judge", "http://sonderlifting.display", "*"]
 
-# Configure CORS
-CORS(app, resources={r"/*": {"origins": allowed_origins}})
+# TODO just for development purposes, revert
 
-socketio = SocketIO(app, debug=True, cors_allowed_origins=allowed_origins, use_reloader=False)
+# # List of allowed origins
+# allowed_origins = ["http://sonderlifting.judge", "http://sonderlifting.display", "*"]
+#
+# # Configure CORS
+# CORS(app, resources={r"/*": {"origins": allowed_origins}})
+#
+# socketio = SocketIO(app, debug=True, cors_allowed_origins=allowed_origins, use_reloader=False)
 
+socketio = SocketIO(app, debug=True, cors_allowed_origins='*', use_reloader=False)
+# TODO handle timer being stopped by judges call
+# isTimerRunning = False
 
 @app.route('/startTimer', methods=['POST'])
 @cross_origin()
-def startTimer():
+def start_timer():
     logging.info('starting timer...')
+    # app.isTimerRunning = True
     duration = request.json.get('time')
-    socketio.emit('VALUES', request.json)
-    socketio.emit('VALID')
+    socketio.emit('TIMER', json.dumps({'isTimerRunning': True, 'duration': duration}))
     while duration >= 0:
-        socketio.emit('TIME', duration)
+        socketio.emit('TIMER', json.dumps({'isTimerRunning': True, 'duration': duration}))
         time.sleep(1)
         duration -= 1
+    socketio.emit('TIMER', json.dumps({'isTimerRunning': False, 'duration': -1}))
+    # app.isTimerRunning = False
     return "ok", 200
 
 
@@ -40,6 +48,8 @@ def values():
 @app.route('/valid', methods=['POST'])
 @cross_origin()
 def valid():
+    # TODO handle judges call stopping timer
+    # app.isTimerRunning = False
     socketio.emit('VALID', request.json.get('valid'))
     return "ok", 200
 
@@ -91,10 +101,12 @@ def lift():
                                       'validLift': valid_value}))
     return "ok", 200
 
+
 @app.route('/test', methods=['GET'])
 @cross_origin()
 def test():
     return "Api Works!!", 200
+
 
 if __name__ == '__main__':
     app.run()
